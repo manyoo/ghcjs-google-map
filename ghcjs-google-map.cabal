@@ -25,14 +25,6 @@ library
                      , ghcjs-dom
   default-language:    Haskell2010
 
-executable ghcjs-google-map-exe
-  hs-source-dirs:      app
-  main-is:             Main.hs
-  ghcjs-options:       -O2
-  build-depends:       base
-                     , ghcjs-google-map
-  default-language:    Haskell2010
-
 test-suite ghcjs-google-map-test
   type:                exitcode-stdio-1.0
   hs-source-dirs:      test
