@@ -24,4 +24,4 @@ type Tilt = Int
 type ZoomLevel = Int
 type Heading = Int
 type Pixel = Int
-type MapOptions = Object
+type JSMapOptions = Object

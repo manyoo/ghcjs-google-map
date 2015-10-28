@@ -1,8 +1,13 @@
-{-# LANGUAGE JavaScriptFFI #-}
+{-# LANGUAGE JavaScriptFFI, OverloadedStrings #-}
 module Google.Maps.Map where
 
 import GHCJS.Types
+import GHCJS.Marshal
 import GHCJS.DOM.Node
+import Data.JSString
+import JavaScript.Object
+
+import Control.Monad
 
 import Google.Maps.Types
 import Google.Maps.LatLng
@@ -10,7 +15,10 @@ import Google.Maps.LatLng
 type Map = JSVal
 
 foreign import javascript unsafe "new google.maps.Map($1, $2)"
-    mkMap :: Node -> MapOptions -> IO Map
+    jsMkMap :: Node -> JSMapOptions -> IO Map
+
+mkMap :: Node -> MapOption -> IO Map
+mkMap n opt = toJSOption opt >>= jsMkMap n
 
 foreign import javascript unsafe "($1).getCenter()"
     getCenter :: Map -> IO LatLng
@@ -40,10 +48,78 @@ foreign import javascript unsafe "($2).setCenter($1)"
     setCenter :: LatLng -> Map -> IO ()
 
 foreign import javascript unsafe "($2).setOptions($1)"
-    setOptions :: MapOptions -> Map -> IO ()
+    jsSetOptions :: JSMapOptions -> Map -> IO ()
+
+setOptions :: MapOption -> Map -> IO ()
+setOptions opt m = toJSOption opt >>= flip jsSetOptions m
 
 foreign import javascript unsafe "($2).setTilt($1)"
     setTilt :: Tilt -> Map -> IO ()
 
 foreign import javascript unsafe "($2).setZoom($1)"
     setZoom :: ZoomLevel -> Map -> IO ()
+
+data MapOptionItem = OptBackGroundColor JSString
+                   | OptCenter LatLng
+                   | OptDisableDefaultUI Bool
+                   | OptDisableDoubleClickZoom Bool
+                   | OptDraggable Bool
+                   | OptDraggableCursor JSString
+                   | OptDraggingCursor JSString
+                   | OptHeading Heading
+                   | OptKeyboardShortcuts Bool
+                   | OptMapMaker Bool
+                   | OptMapTypeControl Bool
+                   | OptMapType MapType
+                   | OptMaxZoom ZoomLevel
+                   | OptMinZoom ZoomLevel
+                   | OptNoClear Bool
+                   | OptOverviewMapControl Bool
+                   | OptPanControl Bool
+                   | OptRotateControl Bool
+                   | OptScaleControl Bool
+                   | OptScrollWheel Bool
+                   | OptStreetViewControl Bool
+                   | OptTilt Tilt
+                   | OptZoom ZoomLevel
+                   | OptZoomControl Bool
+
+c ~: v = c v
+
+type MapOption = [MapOptionItem]
+
+toJSValsHelper k v = toJSVal v >>= return . (,) k
+
+toJSVals :: MapOptionItem -> IO (JSString, JSVal)
+toJSVals (OptBackGroundColor c) = toJSValsHelper "backgroundColor" c
+toJSVals (OptCenter c) = toJSValsHelper "center" c
+toJSVals (OptDisableDefaultUI d) = toJSValsHelper "disableDefaultUI" d
+toJSVals (OptDisableDoubleClickZoom d) = toJSValsHelper "disableDoubleClickZoom" d
+toJSVals (OptDraggable d) = toJSValsHelper "draggable" d
+toJSVals (OptDraggableCursor c) = toJSValsHelper "draggableCursor" c
+toJSVals (OptDraggingCursor c) = toJSValsHelper "draggingCursor" c
+toJSVals (OptHeading h) = toJSValsHelper "heading" h
+toJSVals (OptKeyboardShortcuts k) = toJSValsHelper "keyboardShortcuts" k
+toJSVals (OptMapMaker m) = toJSValsHelper "mapMaker" m
+toJSVals (OptMapTypeControl m) = toJSValsHelper "mapTypeControl" m
+toJSVals (OptMapType t) = toJSValsHelper "mapTypeId" t
+toJSVals (OptMaxZoom z) = toJSValsHelper "maxZoom" z
+toJSVals (OptMinZoom z) = toJSValsHelper "minZoom" z
+toJSVals (OptNoClear n) = toJSValsHelper "noClear" n
+toJSVals (OptOverviewMapControl o) = toJSValsHelper "overviewMapControl" o
+toJSVals (OptPanControl p) = toJSValsHelper "panControl" p
+toJSVals (OptRotateControl p) = toJSValsHelper "rotateControl" p
+toJSVals (OptScaleControl s) = toJSValsHelper "scaleControl" s
+toJSVals (OptScrollWheel s) = toJSValsHelper "scrollWheel" s
+toJSVals (OptStreetViewControl s) = toJSValsHelper "streetViewControl" s
+toJSVals (OptTilt t) = toJSValsHelper "tilt" t
+toJSVals (OptZoom z) = toJSValsHelper "zoom" z
+toJSVals (OptZoomControl c) = toJSValsHelper "zoomControl" c
+
+toJSOption :: MapOption -> IO JSMapOptions
+toJSOption opts = do
+    obj <- create
+    forM_ opts (\item -> do
+        (k, v) <- toJSVals item
+        setProp k v obj)
+    return obj
