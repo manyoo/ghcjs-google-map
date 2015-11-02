@@ -30,7 +30,10 @@ foreign import javascript unsafe "($1).getHeading()"
     getHeading :: Map -> IO Heading
 
 foreign import javascript unsafe "($1).getMapTypeId()"
-    getMapTypeId :: Map -> IO MapType
+    getMapType :: Map -> IO MapType
+
+foreign import javascript unsafe "($2).setMapTypeId($1)"
+    setMapType :: MapType -> Map -> IO ()
 
 foreign import javascript unsafe "($1).getTilt()"
     getTilt :: Map -> IO Tilt
