@@ -26,3 +26,6 @@ foreign import javascript unsafe "google.maps.event.clearInstanceListeners($1)"
 
 foreign import javascript unsafe "google.maps.event.clearListeners($1)"
     clearListeners :: Map -> IO ()
+
+foreign import javascript unsafe "google.maps.event.trigger($2, $1)"
+    trigger :: JSString -> Map -> IO ()
