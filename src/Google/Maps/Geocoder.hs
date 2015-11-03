@@ -1,4 +1,4 @@
-{-# LANGUAGE JavaScriptFFI #-}
+{-# LANGUAGE JavaScriptFFI, OverloadedStrings #-}
 module Google.Maps.Geocoder where
 
 import GHCJS.Types
@@ -6,21 +6,27 @@ import GHCJS.Foreign.Callback
 import GHCJS.Marshal
 import JavaScript.Object.Internal
 
+import Control.Monad
 import Data.Maybe (fromJust, isJust)
 
+import Google.Maps.Types
+import Google.Maps.LatLng
+
 type Geocoder = JSVal
-type GeocoderRequest = Object
+type JSGeocoderRequest = Object
 type GeocoderResult = Object
 
 type GeocoderStatus = JSString
 
-
+-- | create a new JS Geocoder object
 foreign import javascript unsafe "new google.maps.Geocoder()"
     mkGeocoder :: IO Geocoder
 
+-- wrapper for the actual JS geocode function
 foreign import javascript unsafe "($3).geocode($1, $2)"
-    jsGeocode :: GeocoderRequest -> Callback (JSVal -> JSVal -> IO ()) -> Geocoder -> IO ()
+    jsGeocode :: JSGeocoderRequest -> Callback (JSVal -> JSVal -> IO ()) -> Geocoder -> IO ()
 
+-- | a simplified API for geocode
 geocode :: GeocoderRequest -> ([GeocoderResult] -> GeocoderStatus -> IO ()) -> Geocoder -> IO ()
 geocode req cb geocoder = do
     jsCb <- syncCallback2 ThrowWouldBlock (\jsVal1 jsVal2 -> do
@@ -30,8 +36,33 @@ geocode req cb geocoder = do
             then cb (fromJust res) (fromJust sts)
             else return ()
         )
-    jsGeocode req jsCb geocoder
+    jsreq <- toJSGeocodeRequest req
+    jsGeocode jsreq jsCb geocoder
 
+-- GeocoderRequest data definition (not all fields supported yet)
+data GeocodeRequestItem = GRAddress JSString
+                        | GRLocation LatLng
+                        | GRPlaceID JSString
+                        | GRRegion JSString
+
+type GeocoderRequest = [GeocodeRequestItem]
+
+toJSValTuple :: GeocodeRequestItem -> IO (JSString, JSVal)
+toJSValTuple (GRAddress a) = toJSValsHelper "address" a
+toJSValTuple (GRLocation l) = toJSValsHelper "location" l
+toJSValTuple (GRPlaceID p) = toJSValsHelper "placeId" p
+toJSValTuple (GRRegion r) = toJSValsHelper "region" r
+
+toJSGeocodeRequest :: GeocoderRequest -> IO JSGeocoderRequest
+toJSGeocodeRequest reqs = do
+    obj <- create
+    forM_ reqs (\req -> do
+        (k, v) <- toJSValTuple req
+        setProp k v obj
+        )
+    return obj
+
+-- GeocoderStatus values imported from JS
 foreign import javascript unsafe "google.maps.GeocoderStatus.ERROR"
     gsError :: GeocoderStatus
 

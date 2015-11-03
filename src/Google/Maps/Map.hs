@@ -87,11 +87,7 @@ data MapOptionItem = OptBackGroundColor JSString
                    | OptZoom ZoomLevel
                    | OptZoomControl Bool
 
-c ~: v = c v
-
 type MapOption = [MapOptionItem]
-
-toJSValsHelper k v = toJSVal v >>= return . (,) k
 
 toJSVals :: MapOptionItem -> IO (JSString, JSVal)
 toJSVals (OptBackGroundColor c) = toJSValsHelper "backgroundColor" c
