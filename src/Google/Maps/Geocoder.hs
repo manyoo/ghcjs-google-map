@@ -14,7 +14,7 @@ import Google.Maps.LatLng
 
 type Geocoder = JSVal
 type JSGeocoderRequest = Object
-type GeocoderResult = Object
+type JSGeocoderResult = Object
 
 type GeocoderStatus = JSString
 
@@ -30,10 +30,16 @@ foreign import javascript unsafe "($3).geocode($1, $2)"
 geocode :: GeocoderRequest -> ([GeocoderResult] -> GeocoderStatus -> IO ()) -> Geocoder -> IO ()
 geocode req cb geocoder = do
     jsCb <- syncCallback2 ThrowWouldBlock (\jsVal1 jsVal2 -> do
-        res <- fmap (fmap Object) <$> fromJSVal jsVal1
+        -- convert JSVal to Maybe [JSGeocoderResult]
+        jsres <- fmap (fmap Object) <$> fromJSVal jsVal1
         sts <- fromJSVal jsVal2
-        if isJust res && isJust sts
-            then cb (fromJust res) (fromJust sts)
+        if isJust jsres && isJust sts
+            then do -- convert [JSGeocoderResult] to Maybe [GeocoderResult]
+                let jsresList = fromJust jsres
+                mayResList <- mapM fromJSGeocoderResult jsresList >>= return . sequence
+                if isJust mayResList
+                    then cb (fromJust mayResList) (fromJust sts)
+                    else return ()
             else return ()
         )
     jsreq <- toJSGeocodeRequest req
@@ -83,3 +89,49 @@ foreign import javascript unsafe "google.maps.GeocoderStatus.UNKNOWN_ERROR"
 
 foreign import javascript unsafe "google.maps.GeocoderStatus.ZERO_RESULTS"
     gsZeroResults :: GeocoderStatus
+
+
+-- GeocoderResult from JSVals
+data GeocoderAddressComponent = GeocoderAddressComponent {
+    longName :: JSString,
+    shortName :: JSString,
+    gacTypes :: [JSString]
+}
+
+type JSGeocoderAddressComponent = Object
+
+fromJSGeocoderAddressComponent :: JSGeocoderAddressComponent -> IO (Maybe GeocoderAddressComponent)
+fromJSGeocoderAddressComponent comp = do
+    let getJSVal n = getProp n comp >>= fromJSVal
+    ln <- getJSVal "long_name"
+    sn <- getJSVal "short_name"
+    tps <- getJSVal "types"
+    return $ GeocoderAddressComponent <$> ln <*> sn <*> tps
+
+data GeocoderResult = GeocoderResult {
+    addrComponents :: [GeocoderAddressComponent],
+    formattedAddress :: JSString,
+    partialMatch :: Bool,
+    placeId :: JSString,
+    postCodeLocalities :: [JSString],
+    grTypes :: [JSString]
+}
+
+fromJSGeocoderResult :: JSGeocoderResult -> IO (Maybe GeocoderResult)
+fromJSGeocoderResult res = do
+    let getJSVal n = getProp n res >>= fromJSVal
+    -- get the address_components JSVal first
+    jsvalComp <- getProp "address_components" res
+    -- convert JSVal to Maybe [JSGeocoderAddressComponent]
+    jscomps <- fmap (fmap Object) <$> fromJSVal jsvalComp
+    -- convert jscomps to Maybe [GeocoderAddressComponent]
+    comps <- case jscomps of
+                Nothing -> return Nothing
+                Just jscompList -> mapM fromJSGeocoderAddressComponent jscompList >>= return . sequence
+    faddr <- getJSVal "formatted_address"
+    partMatch <- getJSVal "partial_match"
+    pId <- getJSVal "place_id"
+    pl <- getJSVal "postcode_localities"
+    tps <- getJSVal "types"
+
+    return $ GeocoderResult <$> comps <*> faddr <*> partMatch <*> pId <*> pl <*> tps
