@@ -1,5 +1,9 @@
 {-# LANGUAGE JavaScriptFFI, OverloadedStrings #-}
-module Google.Maps.Map where
+module Google.Maps.Map (
+    Map, mkMap, getCenter, getDiv, getHeading, getMapType, setMapType, getTilt,
+    getZoom, panBy, panTo, setCenter, setOptions, setTilt, setZoom, MapOptionItem(..),
+    MapOption
+    ) where
 
 import GHCJS.Types
 import GHCJS.Marshal

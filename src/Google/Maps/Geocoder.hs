@@ -1,5 +1,9 @@
 {-# LANGUAGE JavaScriptFFI, OverloadedStrings #-}
-module Google.Maps.Geocoder where
+module Google.Maps.Geocoder (
+    Geocoder, GeocoderStatus, GeocodeRequestItem(..), GeocoderRequest, GeocoderResult(..),
+    GeocoderAddressComponent(..), mkGeocoder, geocode, gsError, gsInvalidRequest,
+    gsOK, gsOverQueryLimit, gsRequestDenied, gsUnknownError, gsZeroResults
+    ) where
 
 import GHCJS.Types
 import GHCJS.Foreign.Callback
