@@ -27,27 +27,26 @@ foreign import javascript unsafe "new google.maps.Geocoder()"
     mkGeocoder :: IO Geocoder
 
 -- wrapper for the actual JS geocode function
-foreign import javascript unsafe "($3).geocode($1, $2)"
-    jsGeocode :: JSGeocoderRequest -> Callback (JSVal -> JSVal -> IO ()) -> Geocoder -> IO ()
+foreign import javascript interruptible "($2).geocode($1, function(results, status) { $c({results: results, status: status}); });"
+    jsGeocode :: JSGeocoderRequest -> Geocoder -> IO JSVal
 
 -- | a simplified API for geocode
-geocode :: GeocoderRequest -> ([GeocoderResult] -> GeocoderStatus -> IO ()) -> Geocoder -> IO ()
-geocode req cb geocoder = do
-    jsCb <- syncCallback2 ThrowWouldBlock (\jsVal1 jsVal2 -> do
-        -- convert JSVal to Maybe [JSGeocoderResult]
-        jsres <- fmap (fmap Object) <$> fromJSVal jsVal1
-        sts <- fromJSVal jsVal2
-        if isJust jsres && isJust sts
-            then do -- convert [JSGeocoderResult] to Maybe [GeocoderResult]
-                let jsresList = fromJust jsres
-                mayResList <- mapM fromJSGeocoderResult jsresList >>= return . sequence
-                if isJust mayResList
-                    then cb (fromJust mayResList) (fromJust sts)
-                    else return ()
-            else return ()
-        )
+geocode :: GeocoderRequest -> Geocoder -> IO (Maybe ([GeocoderResult], GeocoderStatus))
+geocode req geocoder = do
     jsreq <- toJSGeocodeRequest req
-    jsGeocode jsreq jsCb geocoder
+    resObj <- Object <$> jsGeocode jsreq geocoder
+    -- convert JSVal to Maybe [JSGeocoderResult]
+    resList <- getProp "results" resObj
+    jsres <- fmap (fmap Object) <$> fromJSVal resList
+    sts <- getProp "status" resObj >>= fromJSVal
+    if isJust jsres && isJust sts
+        then do -- convert [JSGeocoderResult] to Maybe [GeocoderResult]
+            let jsresList = fromJust jsres
+            mayResList <- mapM fromJSGeocoderResult jsresList >>= return . sequence
+            if isJust mayResList
+                then return $ Just (fromJust mayResList, fromJust sts)
+                else return Nothing
+        else return Nothing
 
 -- GeocoderRequest data definition (not all fields supported yet)
 data GeocodeRequestItem = GRAddress JSString
