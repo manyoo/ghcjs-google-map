@@ -103,7 +103,7 @@ data PredictionSubstring = PredictionSubstring {
 data AutoCompletePrediction = AutoCompletePrediction {
     description :: JSString,
     matchedSubstrings :: [PredictionSubstring],
-    placeId :: JSString,
+    acPlaceId :: JSString,
     terms :: [PredictionTerm],
     types :: [JSString]
 }
