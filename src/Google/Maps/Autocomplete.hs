@@ -24,7 +24,7 @@ type JSAutoCompletePrediction = Object
 type PlacesServiceStatus = JSString
 
 -- | create a new AutoCompleteService object
-foreign import javascript unsafe "new google.maps.places.AutoCompleteService()"
+foreign import javascript unsafe "new google.maps.places.AutocompleteService()"
     mkAutoComplete :: IO AutoComplete
 
 foreign import javascript interruptible "($2).getPlacePredictions($1, function(acpArray, status) { $c({predictions: acpArray, status: status}); });"
