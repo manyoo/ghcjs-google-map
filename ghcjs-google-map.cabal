@@ -20,6 +20,7 @@ library
                      , Google.Maps.Event
                      , Google.Maps.Map
                      , Google.Maps.Geocoder
+                     , Google.Maps.Autocomplete
                      , Google.Maps
   build-depends:       base >= 4.7 && < 5
                      , ghcjs-base

@@ -6,7 +6,6 @@ module Google.Maps.Geocoder (
     ) where
 
 import GHCJS.Types
-import GHCJS.Foreign.Callback
 import GHCJS.Marshal
 import JavaScript.Object.Internal
 
