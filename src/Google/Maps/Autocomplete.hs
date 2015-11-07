@@ -8,11 +8,13 @@ module Google.Maps.Autocomplete (
 
 import GHCJS.Types
 import GHCJS.Marshal
-import Data.JSString
+import Data.JSString hiding (length, map)
 import JavaScript.Object.Internal
+import JavaScript.Array.Internal hiding (create)
 
 import Control.Monad
 import Data.Maybe (fromJust, isJust)
+import Prelude hiding (length)
 
 import Google.Maps.Types
 import Google.Maps.LatLng
@@ -35,16 +37,18 @@ getPlacePredictions req ac = do
     jsreq <- toJSAutoCompleteRequest req
     resObj <- Object <$> jsGetPlacePredictions jsreq ac
     -- convert JSVal to Maybe [AutoCompletePrediction]
-    predList <- getProp "predictions" resObj
-    jsPreds <- fmap (fmap Object) <$> fromJSVal predList
+    mPredArr <- getJSVal "predictions" resObj >>= return . fmap SomeJSArray
     sts <- getJSVal "status" resObj
-    if isJust jsPreds && isJust sts
+    if isJust mPredArr && isJust sts
         then do -- convert [JSAutoCompletePrediction] to Maybe [AutoCompletePrediction]
-            let jsPredList = fromJust jsPreds
-            mayPredList <- mapM fromJSAutoCompletePrediction jsPredList >>= return . sequence
-            if isJust mayPredList
-                then return $ Just (fromJust mayPredList, fromJust sts)
-                else return Nothing
+            let jsPredArr = fromJust mPredArr
+            if length jsPredArr == 0
+                then return Nothing
+                else do
+                    mayPredList <- mapM fromJSAutoCompletePrediction (map Object $ toList jsPredArr) >>= return . sequence
+                    if isJust mayPredList
+                        then return $ Just (fromJust mayPredList, fromJust sts)
+                        else return Nothing
         else return Nothing
 
 data AutoCompleteRequestItem = ACRInput JSString  -- user input address
@@ -130,14 +134,22 @@ fromJSAutoCompletePrediction pred = do
     pId <- getJSVal "palce_id" pred
     tps <- getJSVal "types" pred
 
-    mjssubstrs <- getJSVal "matched_substrings" pred
-    mSubStrs <- case mjssubstrs of
+    mjssubstrArr <- getJSVal "matched_substrings" pred >>= return . fmap SomeJSArray
+    mSubStrs <- case mjssubstrArr of
         Nothing -> return Nothing
-        Just jssubstrs -> mapM fromJSPredictionSubstring jssubstrs >>= return . sequence
+        Just jssubstrArr -> do
+            let l = length jssubstrArr
+            if l == 0
+                then return Nothing
+                else mapM fromJSPredictionSubstring (toList jssubstrArr) >>= return . sequence
 
-    mjsterms <- getJSVal "terms" pred
+    mjsterms <- getJSVal "terms" pred >>= return . fmap SomeJSArray
     mTerms <- case mjsterms of
         Nothing -> return Nothing
-        Just jsterms -> mapM fromJSPredictionTerm jsterms >>= return . sequence
+        Just jsterms -> do
+            let l = length jsterms
+            if l == 0
+                then return Nothing
+                else mapM fromJSPredictionTerm (toList jsterms) >>= return . sequence
 
     return $ AutoCompletePrediction <$> desc <*> mSubStrs <*> pId <*> mTerms <*> tps
