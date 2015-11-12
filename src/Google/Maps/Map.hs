@@ -1,6 +1,6 @@
 {-# LANGUAGE JavaScriptFFI, OverloadedStrings #-}
 module Google.Maps.Map (
-    Map, mkMap, getCenter, getDiv, getHeading, getMapType, setMapType, getTilt,
+    GMap, mkMap, getCenter, getDiv, getHeading, getMapType, setMapType, getTilt,
     getZoom, panBy, panTo, setCenter, setOptions, setTilt, setZoom, MapOptionItem(..),
     MapOption
     ) where
@@ -16,55 +16,55 @@ import Control.Monad
 import Google.Maps.Types
 import Google.Maps.LatLng
 
-type Map = JSVal
+type GMap = JSVal
 
 foreign import javascript unsafe "new google.maps.Map($1, $2)"
-    jsMkMap :: Node -> JSMapOptions -> IO Map
+    jsMkMap :: Node -> JSMapOptions -> IO GMap
 
-mkMap :: Node -> MapOption -> IO Map
+mkMap :: Node -> MapOption -> IO GMap
 mkMap n opt = toJSOption opt >>= jsMkMap n
 
 foreign import javascript unsafe "($1).getCenter()"
-    getCenter :: Map -> IO LatLng
+    getCenter :: GMap -> IO LatLng
 
 foreign import javascript unsafe "($1).getDiv()"
-    getDiv :: Map -> IO Node
+    getDiv :: GMap -> IO Node
 
 foreign import javascript unsafe "($1).getHeading()"
-    getHeading :: Map -> IO Heading
+    getHeading :: GMap -> IO Heading
 
 foreign import javascript unsafe "($1).getMapTypeId()"
-    getMapType :: Map -> IO MapType
+    getMapType :: GMap -> IO MapType
 
 foreign import javascript unsafe "($2).setMapTypeId($1)"
-    setMapType :: MapType -> Map -> IO ()
+    setMapType :: MapType -> GMap -> IO ()
 
 foreign import javascript unsafe "($1).getTilt()"
-    getTilt :: Map -> IO Tilt
+    getTilt :: GMap -> IO Tilt
 
 foreign import javascript unsafe "($1).getZoom()"
-    getZoom :: Map -> IO ZoomLevel
+    getZoom :: GMap -> IO ZoomLevel
 
 foreign import javascript unsafe "($3).panBy($1, $2)"
-    panBy :: Pixel -> Pixel -> Map -> IO ()
+    panBy :: Pixel -> Pixel -> GMap -> IO ()
 
 foreign import javascript unsafe "($2).panTo($1)"
-    panTo :: LatLng -> Map -> IO ()
+    panTo :: LatLng -> GMap -> IO ()
 
 foreign import javascript unsafe "($2).setCenter($1)"
-    setCenter :: LatLng -> Map -> IO ()
+    setCenter :: LatLng -> GMap -> IO ()
 
 foreign import javascript unsafe "($2).setOptions($1)"
-    jsSetOptions :: JSMapOptions -> Map -> IO ()
+    jsSetOptions :: JSMapOptions -> GMap -> IO ()
 
-setOptions :: MapOption -> Map -> IO ()
+setOptions :: MapOption -> GMap -> IO ()
 setOptions opt m = toJSOption opt >>= flip jsSetOptions m
 
 foreign import javascript unsafe "($2).setTilt($1)"
-    setTilt :: Tilt -> Map -> IO ()
+    setTilt :: Tilt -> GMap -> IO ()
 
 foreign import javascript unsafe "($2).setZoom($1)"
-    setZoom :: ZoomLevel -> Map -> IO ()
+    setZoom :: ZoomLevel -> GMap -> IO ()
 
 data MapOptionItem = OptBackGroundColor JSString
                    | OptCenter LatLng
