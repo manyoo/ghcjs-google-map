@@ -1,8 +1,8 @@
 {-# LANGUAGE JavaScriptFFI, OverloadedStrings #-}
 module Google.Maps.Map (
     Map, mkMap, getCenter, getDiv, getHeading, getMapType, setMapType, getTilt,
-    getZoom, panBy, panTo, setCenter, setOptions, setTilt, setZoom, MapOptionItem(..),
-    MapOption
+    getZoom, panBy, panTo, setCenter, setOptions, setTilt, setZoom, setHeading,
+    MapOptionItem(..), MapOption
     ) where
 
 import GHCJS.Types
@@ -65,6 +65,10 @@ foreign import javascript unsafe "($2).setTilt($1)"
 
 foreign import javascript unsafe "($2).setZoom($1)"
     setZoom :: ZoomLevel -> Map -> IO ()
+
+foreign import javascript unsafe "($2).setHeading($1)"
+    setHeading :: Heading -> Map -> IO ()
+
 
 data MapOptionItem = OptBackGroundColor JSString
                    | OptCenter LatLng
