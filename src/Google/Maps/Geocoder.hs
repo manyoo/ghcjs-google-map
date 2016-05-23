@@ -22,11 +22,11 @@ type JSGeocoderResult = Object
 type GeocoderStatus = JSString
 
 -- | create a new JS Geocoder object
-foreign import javascript unsafe "new google.maps.Geocoder()"
+foreign import javascript unsafe "new google['maps']['Geocoder']()"
     mkGeocoder :: IO Geocoder
 
 -- wrapper for the actual JS geocode function
-foreign import javascript interruptible "($2).geocode($1, function(results, status) { $c({results: results, status: status}); });"
+foreign import javascript interruptible "($2)['geocode']($1, function(results, status) { $c({results: results, status: status}); });"
     jsGeocode :: JSGeocoderRequest -> Geocoder -> IO JSVal
 
 -- | a simplified API for geocode
@@ -71,25 +71,25 @@ toJSGeocodeRequest reqs = do
     return obj
 
 -- GeocoderStatus values imported from JS
-foreign import javascript unsafe "google.maps.GeocoderStatus.ERROR"
+foreign import javascript unsafe "google['maps']['GeocoderStatus']['ERROR']"
     gsError :: GeocoderStatus
 
-foreign import javascript unsafe "google.maps.GeocoderStatus.INVALID_REQUEST"
+foreign import javascript unsafe "google['maps']['GeocoderStatus']['INVALID_REQUEST']"
     gsInvalidRequest :: GeocoderStatus
 
-foreign import javascript unsafe "google.maps.GeocoderStatus.OK"
+foreign import javascript unsafe "google['maps']['GeocoderStatus']['OK']"
     gsOK :: GeocoderStatus
 
-foreign import javascript unsafe "google.maps.GeocoderStatus.OVER_QUERY_LIMIT"
+foreign import javascript unsafe "google['maps']['GeocoderStatus']['OVER_QUERY_LIMIT']"
     gsOverQueryLimit :: GeocoderStatus
 
-foreign import javascript unsafe "google.maps.GeocoderStatus.REQUEST_DENIED"
+foreign import javascript unsafe "google['maps']['GeocoderStatus']['REQUEST_DENIED']"
     gsRequestDenied :: GeocoderStatus
 
-foreign import javascript unsafe "google.maps.GeocoderStatus.UNKNOWN_ERROR"
+foreign import javascript unsafe "google['maps']['GeocoderStatus']['UNKNOWN_ERROR']"
     gsUnknownError :: GeocoderStatus
 
-foreign import javascript unsafe "google.maps.GeocoderStatus.ZERO_RESULTS"
+foreign import javascript unsafe "google['maps']['GeocoderStatus']['ZERO_RESULTS']"
     gsZeroResults :: GeocoderStatus
 
 

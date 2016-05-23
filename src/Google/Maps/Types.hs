@@ -9,16 +9,16 @@ import Google.Maps.LatLng
 
 type MapType = JSString
 
-foreign import javascript unsafe "google.maps.MapTypeId.HYBRID"
+foreign import javascript unsafe "google['maps']['MapTypeId']['HYBRID']"
     mapTypeHybrid :: MapType
 
-foreign import javascript unsafe "google.maps.MapTypeId.ROADMAP"
+foreign import javascript unsafe "google['maps']['MapTypeId']['ROADMAP']"
     mapTypeRoadMap :: MapType
 
-foreign import javascript unsafe "google.maps.MapTypeId.SATELLITE"
+foreign import javascript unsafe "google['maps']['MapTypeId']['SATELLITE']"
     mapTypeSatellite :: MapType
 
-foreign import javascript unsafe "google.maps.MapTypeId.TERRAIN"
+foreign import javascript unsafe "google['maps']['MapTypeId']['TERRAIN']"
     mapTypeTerran :: MapType
 
 type Tilt = Int

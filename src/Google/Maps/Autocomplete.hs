@@ -26,10 +26,10 @@ type JSAutoCompletePrediction = Object
 type PlacesServiceStatus = JSString
 
 -- | create a new AutoCompleteService object
-foreign import javascript unsafe "new google.maps.places.AutocompleteService()"
+foreign import javascript unsafe "new google['maps']['places']['AutocompleteService']()"
     mkAutoComplete :: IO AutoComplete
 
-foreign import javascript interruptible "($2).getPlacePredictions($1, function(acpArray, status) { $c({predictions: acpArray, status: status}); });"
+foreign import javascript interruptible "($2)['getPlacePredictions']($1, function(acpArray, status) { $c({predictions: acpArray, status: status}); });"
     jsGetPlacePredictions :: JSAutoCompleteRequest -> AutoComplete -> IO JSVal
 
 getPlacePredictions :: AutoCompleteRequest -> AutoComplete -> IO (Maybe ([AutoCompletePrediction], PlacesServiceStatus))
@@ -76,22 +76,22 @@ toJSAutoCompleteRequest reqs = do
     return obj
 
 -- PlacesServiceStatus values imported from JS
-foreign import javascript unsafe "google.maps.places.PlacesServiceStatus.INVALID_REQUEST"
+foreign import javascript unsafe "google['maps']['places']['PlacesServiceStatus']['INVALID_REQUEST']"
     psInvalidRequest :: PlacesServiceStatus
 
-foreign import javascript unsafe "google.maps.places.PlacesServiceStatus.OK"
+foreign import javascript unsafe "google['maps']['places']['PlacesServiceStatus']['OK']"
     psOK :: PlacesServiceStatus
 
-foreign import javascript unsafe "google.maps.places.PlacesServiceStatus.OVER_QUERY_LIMIT"
+foreign import javascript unsafe "google['maps']['places']['PlacesServiceStatus']['OVER_QUERY_LIMIT']"
     psOverQueryLimit :: PlacesServiceStatus
 
-foreign import javascript unsafe "google.maps.places.PlacesServiceStatus.REQUEST_DENIED"
+foreign import javascript unsafe "google['maps']['places']['PlacesServiceStatus']['REQUEST_DENIED']"
     psRequestDenied :: PlacesServiceStatus
 
-foreign import javascript unsafe "google.maps.places.PlacesServiceStatus.UNKNOWN_ERROR"
+foreign import javascript unsafe "google['maps']['places']['PlacesServiceStatus']['UNKNOWN_ERROR']"
     psUnknownError :: PlacesServiceStatus
 
-foreign import javascript unsafe "google.maps.places.PlacesServiceStatus.ZERO_RESULTS"
+foreign import javascript unsafe "google['maps']['places']['PlacesServiceStatus']['ZERO_RESULTS']"
     psZeroResults :: PlacesServiceStatus
 
 data PredictionTerm = PredictionTerm {

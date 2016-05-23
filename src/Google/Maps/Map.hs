@@ -18,55 +18,55 @@ import Google.Maps.LatLng
 
 type Map = JSVal
 
-foreign import javascript unsafe "new google.maps.Map($1, $2)"
+foreign import javascript unsafe "new google['maps']['Map']($1, $2)"
     jsMkMap :: Node -> JSMapOptions -> IO Map
 
 mkMap :: Node -> MapOption -> IO Map
 mkMap n opt = toJSOption opt >>= jsMkMap n
 
-foreign import javascript unsafe "($1).getCenter()"
+foreign import javascript unsafe "($1)['getCenter']()"
     getCenter :: Map -> IO LatLng
 
-foreign import javascript unsafe "($1).getDiv()"
+foreign import javascript unsafe "($1)['getDiv']()"
     getDiv :: Map -> IO Node
 
-foreign import javascript unsafe "($1).getHeading()"
+foreign import javascript unsafe "($1)['getHeading']()"
     getHeading :: Map -> IO Heading
 
-foreign import javascript unsafe "($1).getMapTypeId()"
+foreign import javascript unsafe "($1)['getMapTypeId']()"
     getMapType :: Map -> IO MapType
 
-foreign import javascript unsafe "($2).setMapTypeId($1)"
+foreign import javascript unsafe "($2)['setMapTypeId']($1)"
     setMapType :: MapType -> Map -> IO ()
 
-foreign import javascript unsafe "($1).getTilt()"
+foreign import javascript unsafe "($1)['getTilt']()"
     getTilt :: Map -> IO Tilt
 
-foreign import javascript unsafe "($1).getZoom()"
+foreign import javascript unsafe "($1)['getZoom']()"
     getZoom :: Map -> IO ZoomLevel
 
-foreign import javascript unsafe "($3).panBy($1, $2)"
+foreign import javascript unsafe "($3)['panBy']($1, $2)"
     panBy :: Pixel -> Pixel -> Map -> IO ()
 
-foreign import javascript unsafe "($2).panTo($1)"
+foreign import javascript unsafe "($2)['panTo']($1)"
     panTo :: LatLng -> Map -> IO ()
 
-foreign import javascript unsafe "($2).setCenter($1)"
+foreign import javascript unsafe "($2)['setCenter']($1)"
     setCenter :: LatLng -> Map -> IO ()
 
-foreign import javascript unsafe "($2).setOptions($1)"
+foreign import javascript unsafe "($2)['setOptions']($1)"
     jsSetOptions :: JSMapOptions -> Map -> IO ()
 
 setOptions :: MapOption -> Map -> IO ()
 setOptions opt m = toJSOption opt >>= flip jsSetOptions m
 
-foreign import javascript unsafe "($2).setTilt($1)"
+foreign import javascript unsafe "($2)['setTilt']($1)"
     setTilt :: Tilt -> Map -> IO ()
 
-foreign import javascript unsafe "($2).setZoom($1)"
+foreign import javascript unsafe "($2)['setZoom']($1)"
     setZoom :: ZoomLevel -> Map -> IO ()
 
-foreign import javascript unsafe "($2).setHeading($1)"
+foreign import javascript unsafe "($2)['setHeading']($1)"
     setHeading :: Heading -> Map -> IO ()
 
 
